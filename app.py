@@ -105,6 +105,8 @@ def predict():
     df['Day'] = df['Date'].dt.day
     df = df.drop('Date', axis=1)
     #df['functions'] = df['functions'].apply(lambda x: ' '.join(ast.literal_eval(x)))
+    df['functions'] = df['functions'].apply(lambda x: ' '.join(x) if isinstance(x, list) else 'aucune fonction n\'est modifiée')
+
     df['functions'] = df['functions'].fillna('aucune fonction n\'est modifiée')
 
     # Prédiction de classification
