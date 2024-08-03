@@ -43,89 +43,90 @@ regression_pipeline = Pipeline(steps=[
 
 regression_pipeline.fit(X_train, y_train_reg)
 
+
 def extract_functions_from_diff(diff):
     functions = []
-    # Exemple de regex pour extraire des fonctions Python
     function_pattern = re.compile(r'^(\s*)def\s+(\w+)\s*\(', re.MULTILINE)
     matches = function_pattern.findall(diff)
     for indent, func_name in matches:
         functions.append(func_name)
     return functions
+def extract_function_calls(diff):
+    calls = []
+    call_pattern = re.compile(r'\b(\w+)\(')
+    matches = call_pattern.findall(diff)
+    for func_call in matches:
+        calls.append(func_call)
+    return calls
 
-
+def identify_impacted_functions(modified_functions, commit_files):
+    impacted_functions = set(modified_functions)
+    
+    for file in commit_files:
+        with open(file, 'r') as f:
+            content = f.read()
+            for function in modified_functions:
+                if function in content:
+                    calls = extract_function_calls(content)
+                    impacted_functions.update(calls)
+                    
+    return list(impacted_functions)
 
 def get_commit_data():
-    # Utiliser les commandes Git pour récupérer les informations du commit
     commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
     commit_message = subprocess.check_output(['git', 'log', '-1', '--pretty=%B']).strip().decode('utf-8')
     commit_author = subprocess.check_output(['git', 'log', '-1', '--pretty=%an']).strip().decode('utf-8')
     commit_date = subprocess.check_output(['git', 'log', '-1', '--pretty=%ad', '--date=iso']).strip().decode('utf-8')
 
     commit_files = subprocess.check_output(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', commit_hash]).strip().decode('utf-8').split('\n')
-    commit_files = [f.strip() for f in commit_files if f.strip()]  # Nettoyer les espaces blancs et les lignes vides
+    commit_files = [f.strip() for f in commit_files if f.strip()]
 
-
-    # Récupérer les différences pour chaque fichier
     modified_functions = []
     for file in commit_files:
         diff = subprocess.check_output(['git', 'diff', '--unified=0', commit_hash + '^', commit_hash, '--', file]).decode('utf-8')
         functions = extract_functions_from_diff(diff)
         modified_functions.extend(functions)
 
-    # Préparer les données à afficher
+    impacted_functions = identify_impacted_functions(modified_functions, commit_files)
+
     new_data = {
         "commit": commit_hash,
         "message": commit_message,
         "Author": commit_author,
         "Date": commit_date.split(' ')[0],
-        "functions": modified_functions  
+        "functions": modified_functions,
+        "impacted_functions": impacted_functions
     }
-    
-    print(commit_hash)
-    print(commit_message)
-    print(commit_files)
-    print(commit_author)
-    print(commit_date.split(' ')[0])
-    print(f"Modified Files: {commit_files}")
 
     df = pd.DataFrame([new_data])
     
     return df
 
-
-    
-
 def predict():
     df = get_commit_data()
 
-    # Convertir les données en DataFrame
-    #df = pd.DataFrame([data])
-
-    # Prétraiter les données
     df['Date'] = pd.to_datetime(df['Date'])
     df['Year'] = df['Date'].dt.year
     df['Month'] = df['Date'].dt.month
     df['Day'] = df['Date'].dt.day
     df = df.drop('Date', axis=1)
-    #df['functions'] = df['functions'].apply(lambda x: ' '.join(ast.literal_eval(x)))
     df['functions'] = df['functions'].apply(lambda x: ' '.join(x) if isinstance(x, list) else 'aucune fonction n\'est modifiée')
+    df['impacted_functions'] = df['impacted_functions'].apply(lambda x: ' '.join(x) if isinstance(x, list) else 'aucune fonction n\'est modifiée')
 
     df['functions'] = df['functions'].fillna('aucune fonction n\'est modifiée')
+    df['impacted_functions'] = df['impacted_functions'].fillna('aucune fonction n\'est modifiée')
 
-    # Prédiction de classification
     y_pred_class = classification_pipeline.predict(df)
-
-    # Prédiction de régression
     y_pred_reg = regression_pipeline.predict(df)
 
     response = {
         'classification': y_pred_class.tolist(),
         'regression': y_pred_reg.tolist(),
-        'modified_functions': df['functions'].tolist()
+        'modified_functions': df['functions'].tolist(),
+        'impacted_functions': df['impacted_functions'].tolist()
     }
     
-   
     print(response)
-    
+
 if __name__ == '__main__':
     predict()
