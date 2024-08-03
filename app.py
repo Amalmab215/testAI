@@ -104,7 +104,7 @@ def predict():
     df['Month'] = df['Date'].dt.month
     df['Day'] = df['Date'].dt.day
     df = df.drop('Date', axis=1)
-    df['functions'] = df['functions'].apply(lambda x: ' '.join(ast.literal_eval(x)))
+    #df['functions'] = df['functions'].apply(lambda x: ' '.join(ast.literal_eval(x)))
     df['functions'] = df['functions'].fillna('aucune fonction n\'est modifiée')
 
     # Prédiction de classification
