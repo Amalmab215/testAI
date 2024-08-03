@@ -60,6 +60,12 @@ def get_commit_data():
         "Author": commit_author,
         "Date": commit_date.split(' ')[0]
     }]
+
+    print(commit)
+    print(message)
+    print(functions)
+    print(Author)
+    print(Date)
     
     return pd.DataFrame(new_data)
 
@@ -91,10 +97,6 @@ def predict():
     }
 
     print(response)
-    print(commit)
-    print(message)
-    print(functions)
-    print(Author)
-    print(Date)
+    
 if __name__ == '__main__':
     predict()
