@@ -61,6 +61,11 @@ def get_commit_data():
         "Date": commit_date.split(' ')[0]
     }]
 
+     print(commit_hash)
+    print(commit_message)
+    print(commit_files)
+    print(commit_author)
+    print(commit_date.split(' ')[0])
     
     return pd.DataFrame(new_data)
 
@@ -91,12 +96,7 @@ def predict():
         'modified_functions': df['functions'].tolist()
     }
     
-    print(commit_hash)
-    print(commit_message)
-    print(commit_files)
-    print(commit_author)
-    print(commit_date.split(' ')[0])
-    
+   
     print(response)
     
 if __name__ == '__main__':
