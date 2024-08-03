@@ -120,10 +120,10 @@ def predict():
     y_pred_reg = regression_pipeline.predict(df)
 
     response = {
-        'classification': y_pred_class.tolist(),
-        'regression': y_pred_reg.tolist(),
-        'modified_functions': df['functions'].tolist(),
-        'impacted_functions': df['impacted_functions'].tolist()
+        'Classification': y_pred_class.tolist(),
+        'Regression Probability': y_pred_reg.tolist(),
+        'Modified_functions': df['functions'].tolist(),
+        'Impacted_functions': df['impacted_functions'].tolist()
     }
     
     print(response)
