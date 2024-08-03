@@ -33,8 +33,10 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Start Flask API in the background
+      shell: pwsh
       run: |
-        start /B python app.py
+        Start-Process -FilePath "python" -ArgumentList "app.py" -NoNewWindow -PassThru | Out-Null
+    
     - name: Wait for API to start
       run: |
         timeout /t 20
