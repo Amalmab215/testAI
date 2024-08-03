@@ -5,7 +5,7 @@ from scikeras.wrappers import KerasRegressor
 import ast
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
-
+import subprocess
 # Charger les données d'entraînement
 data = pd.read_csv('data.csv')
 data['functions'] = data['functions'].fillna('aucune fonction n\'est modifiée')
