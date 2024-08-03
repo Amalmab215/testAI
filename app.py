@@ -7,6 +7,8 @@ import ast
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 import subprocess
+import os
+
 app = Flask(__name__)
 
 # Charger les données d'entraînement
@@ -45,6 +47,7 @@ regression_pipeline = Pipeline(steps=[
 ])
 
 regression_pipeline.fit(X_train, y_train_reg)
+
 def get_commit_data():
     # Utiliser les commandes Git pour récupérer les informations du commit
     commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
@@ -70,9 +73,6 @@ def predict():
     df = get_commit_data()
 
     # Convertir les données en DataFrame
-    #df = pd.DataFrame([data])
-
-    # Prétraiter les données
     df['Date'] = pd.to_datetime(df['Date'])
     df['Year'] = df['Date'].dt.year
     df['Month'] = df['Date'].dt.month
@@ -87,11 +87,18 @@ def predict():
     # Prédiction de régression
     y_pred_reg = regression_pipeline.predict(df)
 
-    return jsonify({
+    response = jsonify({
         'classification': y_pred_class.tolist(),
         'regression': y_pred_reg.tolist(),
         'modified_functions': df['functions'].tolist()
     })
+    
+    # Stop the server
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func:
+        func()
+
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
