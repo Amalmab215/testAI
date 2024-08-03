@@ -53,14 +53,22 @@ def get_commit_data():
     commit_files = subprocess.check_output(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', commit_hash]).strip().decode('utf-8').split('\n')
     commit_files = [f.strip() for f in commit_files if f.strip()]  # Nettoyer les espaces blancs et les lignes vides
 
-    new_data = [{
+    # Récupérer les différences pour chaque fichier
+    modified_functions = []
+    for file in commit_files:
+        diff = subprocess.check_output(['git', 'diff', '--unified=0', commit_hash + '^', commit_hash, '--', file]).decode('utf-8')
+        functions = extract_functions_from_diff(diff)
+        modified_functions.extend(functions)
+
+    # Préparer les données à afficher
+    new_data = {
         "commit": commit_hash,
         "message": commit_message,
-        "functions": str(commit_files),
         "Author": commit_author,
-        "Date": commit_date.split(' ')[0]
-    }]
-
+        "Date": commit_date.split(' ')[0],
+        "modified_functions": modified_functions  
+    }
+    
     print(commit_hash)
     print(commit_message)
     print(commit_files)
@@ -68,6 +76,17 @@ def get_commit_data():
     print(commit_date.split(' ')[0])
     
     return pd.DataFrame(new_data)
+
+def extract_functions_from_diff(diff):
+    functions = []
+    # Exemple de regex pour extraire des fonctions Python
+    function_pattern = re.compile(r'^(\s*)def\s+(\w+)\s*\(', re.MULTILINE)
+    matches = function_pattern.findall(diff)
+    for indent, func_name in matches:
+        functions.append(func_name)
+    return functions
+
+    
 
 def predict():
     df = get_commit_data()
