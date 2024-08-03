@@ -66,7 +66,7 @@ def get_commit_data():
         "message": commit_message,
         "Author": commit_author,
         "Date": commit_date.split(' ')[0],
-        "modified_functions": modified_functions  
+        "functions": modified_functions  
     }
     
     print(commit_hash)
