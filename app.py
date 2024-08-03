@@ -1,4 +1,3 @@
-from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
 from tensorflow.keras.models import load_model
@@ -6,10 +5,6 @@ from scikeras.wrappers import KerasRegressor
 import ast
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
-import subprocess
-import os
-
-#app = Flask(__name__)
 
 # Charger les données d'entraînement
 data = pd.read_csv('data.csv')
@@ -48,12 +43,9 @@ regression_pipeline = Pipeline(steps=[
 
 regression_pipeline.fit(X_train, y_train_reg)
 
-#@app.route('/predict', methods=['POST'])
 def predict():
-    #data = request.get_json()
     new_data = [
     {
-    
         "commit": "abc123",
         "message": "Drop labels in Image and Audio folders",
         "functions": "[\"login\", \"authenticate\", \"session\"]",
@@ -79,26 +71,19 @@ def predict():
     df['functions'] = df['functions'].apply(lambda x: ' '.join(ast.literal_eval(x)))
     df['functions'] = df['functions'].fillna('aucune fonction n\'est modifiée')
 
-
     # Prédiction de classification
     y_pred_class = classification_pipeline.predict(df)
 
     # Prédiction de régression
     y_pred_reg = regression_pipeline.predict(df)
 
-    response = jsonify({
+    response = {
         'classification': y_pred_class.tolist(),
         'regression': y_pred_reg.tolist(),
         'modified_functions': df['functions'].tolist()
-    })
-    
-#     # Stop the server
-#     func = request.environ.get('werkzeug.server.shutdown')
-#     if func:
-#         func()
+    }
 
-#     return response
+    print(response)
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
-predict()
+if __name__ == '__main__':
+    predict()
