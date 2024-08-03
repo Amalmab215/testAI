@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import subprocess
 import os
 
-app = Flask(__name__)
+#app = Flask(__name__)
 
 # Charger les données d'entraînement
 data = pd.read_csv('data.csv')
@@ -48,7 +48,7 @@ regression_pipeline = Pipeline(steps=[
 
 regression_pipeline.fit(X_train, y_train_reg)
 
-@app.route('/predict', methods=['POST'])
+#@app.route('/predict', methods=['POST'])
 def predict():
     #data = request.get_json()
     new_data = [
@@ -92,12 +92,13 @@ def predict():
         'modified_functions': df['functions'].tolist()
     })
     
-    # Stop the server
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func:
-        func()
+#     # Stop the server
+#     func = request.environ.get('werkzeug.server.shutdown')
+#     if func:
+#         func()
 
-    return response
+#     return response
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
+predict()
