@@ -43,6 +43,16 @@ regression_pipeline = Pipeline(steps=[
 
 regression_pipeline.fit(X_train, y_train_reg)
 
+def extract_functions_from_diff(diff):
+    functions = []
+    # Exemple de regex pour extraire des fonctions Python
+    function_pattern = re.compile(r'^(\s*)def\s+(\w+)\s*\(', re.MULTILINE)
+    matches = function_pattern.findall(diff)
+    for indent, func_name in matches:
+        functions.append(func_name)
+    return functions
+
+
 def get_commit_data():
     # Utiliser les commandes Git pour récupérer les informations du commit
     commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
@@ -77,14 +87,6 @@ def get_commit_data():
     
     return pd.DataFrame(new_data)
 
-def extract_functions_from_diff(diff):
-    functions = []
-    # Exemple de regex pour extraire des fonctions Python
-    function_pattern = re.compile(r'^(\s*)def\s+(\w+)\s*\(', re.MULTILINE)
-    matches = function_pattern.findall(diff)
-    for indent, func_name in matches:
-        functions.append(func_name)
-    return functions
 
     
 
