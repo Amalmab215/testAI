@@ -91,6 +91,6 @@ def predict():
     }
 
     print(response)
-
+    print(commit " - ", message " - ",functions " - ",Author " - ", Date)
 if __name__ == '__main__':
     predict()
