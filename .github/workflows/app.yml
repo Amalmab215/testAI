@@ -38,8 +38,10 @@ jobs:
         Start-Process -FilePath "python" -ArgumentList "app.py" -NoNewWindow -PassThru | Out-Null
     
     - name: Wait for API to start
+      shell: pwsh
       run: |
-        timeout /t 20
+        Start-Sleep -Seconds 20
+        
     - name: Make prediction request
       run: |
         curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d '{}'
