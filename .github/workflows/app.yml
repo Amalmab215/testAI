@@ -32,12 +32,12 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
-    - name: Start Flask API 
+    - name: Start Flask API in the background
       run: |
-        python app.py 
+        start /B python app.py
     - name: Wait for API to start
       run: |
-        sleep 20
+        timeout /t 20
     - name: Make prediction request
       run: |
         curl -X POST http://127.0.0.1:5000/predict -H "Content-Type: application/json" -d '{}'
