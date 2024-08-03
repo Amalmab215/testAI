@@ -40,7 +40,24 @@ jobs:
     - name: Wait for API to start
       shell: pwsh
       run: |
-        Start-Sleep -Seconds 20
+        $maxRetries = 10
+        $retryInterval = 5
+        $attempt = 0
+        while ($attempt -lt $maxRetries) {
+          try {
+            Invoke-WebRequest -Uri "http://127.0.0.1:5000" -UseBasicParsing
+            Write-Output "API is up and running!"
+            break
+          } catch {
+            Write-Output "Waiting for API to start..."
+            Start-Sleep -Seconds $retryInterval
+            $attempt++
+          }
+        }
+        if ($attempt -eq $maxRetries) {
+          Write-Error "API did not start in time"
+          exit 1
+        }
         
     - name: Make prediction request
       run: |
