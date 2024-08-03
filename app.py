@@ -84,8 +84,10 @@ def get_commit_data():
     print(commit_files)
     print(commit_author)
     print(commit_date.split(' ')[0])
+
+    df = pd.DataFrame([new_data])
     
-    return pd.DataFrame(new_data)
+    return df
 
 
     
