@@ -48,31 +48,29 @@ regression_pipeline = Pipeline(steps=[
 
 regression_pipeline.fit(X_train, y_train_reg)
 
-def get_commit_data():
-    # Utiliser les commandes Git pour récupérer les informations du commit
-    commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
-    commit_message = subprocess.check_output(['git', 'log', '-1', '--pretty=%B']).strip().decode('utf-8')
-    commit_author = subprocess.check_output(['git', 'log', '-1', '--pretty=%an']).strip().decode('utf-8')
-    commit_date = subprocess.check_output(['git', 'log', '-1', '--pretty=%ad', '--date=iso']).strip().decode('utf-8')
-    
-    commit_files = subprocess.check_output(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', commit_hash]).strip().decode('utf-8').split('\n')
-    commit_files = [f.strip() for f in commit_files if f.strip()]  # Nettoyer les espaces blancs et les lignes vides
-
-    new_data = [{
-        "commit": commit_hash,
-        "message": commit_message,
-        "functions": str(commit_files),
-        "Author": commit_author,
-        "Date": commit_date.split(' ')[0]
-    }]
-    
-    return pd.DataFrame(new_data)
-
 @app.route('/predict', methods=['POST'])
 def predict():
-    df = get_commit_data()
+    #data = request.get_json()
+    new_data = [
+    {
+    
+        "commit": "abc123",
+        "message": "Drop labels in Image and Audio folders",
+        "functions": "[\"login\", \"authenticate\", \"session\"]",
+        "User": "JohnDoe",
+        "Author": "John Doe",
+        "Created At": "2023-07-01 12:34:56",
+        "Updated At": "2023-07-02 12:34:56",
+        "Labels": "bug",
+        "State": "closed",
+        "Duration": "2 days",
+        "Date": "2024-07-20"
+    }
+]
 
-    # Convertir les données en DataFrame
+    df = pd.DataFrame(new_data)
+    
+    # Prétraiter les données si nécessaire
     df['Date'] = pd.to_datetime(df['Date'])
     df['Year'] = df['Date'].dt.year
     df['Month'] = df['Date'].dt.month
@@ -80,6 +78,7 @@ def predict():
     df = df.drop('Date', axis=1)
     df['functions'] = df['functions'].apply(lambda x: ' '.join(ast.literal_eval(x)))
     df['functions'] = df['functions'].fillna('aucune fonction n\'est modifiée')
+
 
     # Prédiction de classification
     y_pred_class = classification_pipeline.predict(df)
