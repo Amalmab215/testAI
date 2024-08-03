@@ -61,7 +61,7 @@ def get_commit_data():
         "Date": commit_date.split(' ')[0]
     }]
 
-     print(commit_hash)
+    print(commit_hash)
     print(commit_message)
     print(commit_files)
     print(commit_author)
