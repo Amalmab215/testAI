@@ -53,15 +53,17 @@ def extract_functions_from_diff(diff):
     return functions
 
 
+
 def get_commit_data():
     # Utiliser les commandes Git pour récupérer les informations du commit
     commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
     commit_message = subprocess.check_output(['git', 'log', '-1', '--pretty=%B']).strip().decode('utf-8')
     commit_author = subprocess.check_output(['git', 'log', '-1', '--pretty=%an']).strip().decode('utf-8')
     commit_date = subprocess.check_output(['git', 'log', '-1', '--pretty=%ad', '--date=iso']).strip().decode('utf-8')
-    
+
     commit_files = subprocess.check_output(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', commit_hash]).strip().decode('utf-8').split('\n')
     commit_files = [f.strip() for f in commit_files if f.strip()]  # Nettoyer les espaces blancs et les lignes vides
+
 
     # Récupérer les différences pour chaque fichier
     modified_functions = []
@@ -84,6 +86,7 @@ def get_commit_data():
     print(commit_files)
     print(commit_author)
     print(commit_date.split(' ')[0])
+    print(f"Modified Files: {commit_files}")
 
     df = pd.DataFrame([new_data])
     
