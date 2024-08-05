@@ -6,6 +6,8 @@ import ast
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 import subprocess
+import re
+import json 
 # Charger les données d'entraînement
 data = pd.read_csv('data.csv')
 data['functions'] = data['functions'].fillna('aucune fonction n\'est modifiée')
@@ -25,22 +27,19 @@ _, _, y_train_reg, y_test_reg = train_test_split(X, y_regression, test_size=0.2,
 
 # Charger les modèles
 classification_pipeline = joblib.load('Regression_logistique.pkl')
-preprocessor = joblib.load('preprocessor.pkl')
 
+preprocessor = joblib.load('preprocessor.pkl')
 def create_model():
     # Charger le modèle préalablement sauvegardé
     model = load_model('NeuralNetwork_trained.h5')
     # Recompiler le modèle avec un nouvel optimiseur
     model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mse'])
     return model
-
-regressor = KerasRegressor(build_fn=create_model, verbose=0)
-
+regressor = KerasRegressor(model=create_model, verbose=0)
 regression_pipeline = Pipeline(steps=[
     ('preprocessor', preprocessor),
     ('regressor', regressor)
 ])
-
 regression_pipeline.fit(X_train, y_train_reg)
 
 
@@ -51,6 +50,7 @@ def extract_functions_from_diff(diff):
     for indent, func_name in matches:
         functions.append(func_name)
     return functions
+
 def extract_function_calls(diff):
     calls = []
     call_pattern = re.compile(r'\b(\w+)\(')
@@ -59,18 +59,38 @@ def extract_function_calls(diff):
         calls.append(func_call)
     return calls
 
+
 def identify_impacted_functions(modified_functions, commit_files):
     impacted_functions = set(modified_functions)
-    
+
     for file in commit_files:
-        with open(file, 'r') as f:
-            content = f.read()
-            for function in modified_functions:
-                if function in content:
-                    calls = extract_function_calls(content)
-                    impacted_functions.update(calls)
-                    
+        try:
+            with open(file, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except UnicodeDecodeError:
+            with open(file, 'r', encoding='latin1') as f:
+                content = f.read()
+
+        for function in modified_functions:
+            if function in content:
+                calls = extract_function_calls(content)
+                impacted_functions.update(calls)
+
     return list(impacted_functions)
+
+
+# def identify_impacted_functions(modified_functions, commit_files):
+#     impacted_functions = set(modified_functions)
+#
+#     for file in commit_files:
+#         with open(file, 'r') as f:
+#             content = f.read()
+#             for function in modified_functions:
+#                 if function in content:
+#                     calls = extract_function_calls(content)
+#                     impacted_functions.update(calls)
+#
+#     return list(impacted_functions)
 
 def get_commit_data():
     commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
@@ -80,12 +100,18 @@ def get_commit_data():
 
     commit_files = subprocess.check_output(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', commit_hash]).strip().decode('utf-8').split('\n')
     commit_files = [f.strip() for f in commit_files if f.strip()]
-
     modified_functions = []
     for file in commit_files:
-        diff = subprocess.check_output(['git', 'diff', '--unified=0', commit_hash + '^', commit_hash, '--', file]).decode('utf-8')
+        diff_bytes = subprocess.check_output(['git', 'diff', '--unified=0', commit_hash + '^', commit_hash, '--', file])
+        diff = diff_bytes.decode('utf-8', errors='replace')
         functions = extract_functions_from_diff(diff)
         modified_functions.extend(functions)
+
+
+    # for file in commit_files:
+    #     diff = subprocess.check_output(['git', 'diff', '--unified=0', commit_hash + '^', commit_hash, '--', file]).decode('utf-8')
+    #     functions = extract_functions_from_diff(diff)
+    #     modified_functions.extend(functions)
 
     impacted_functions = identify_impacted_functions(modified_functions, commit_files)
 
@@ -126,7 +152,7 @@ def predict():
         'Impacted_functions': df['impacted_functions'].tolist()
     }
     
-    print(response)
+    print(json.dumps(response))
 
 if __name__ == '__main__':
     predict()
