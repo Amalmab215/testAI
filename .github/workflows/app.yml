@@ -34,7 +34,7 @@ jobs:
         python app.py
 
     
-  Deploy:
+  Docker:
 
     needs: Predict
     runs-on: ubuntu-latest
