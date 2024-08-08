@@ -37,7 +37,7 @@ jobs:
   Deploy:
 
     needs: Predict
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Check out the repository
