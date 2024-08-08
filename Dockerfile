@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y git
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
+# Cloner le dépôt Git
+RUN git clone https://github.com/Amalmab215/testAI.git /app
+
 # Copier le fichier requirements.txt (si vous en avez un) et installer les dépendances
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
