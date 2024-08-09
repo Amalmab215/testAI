@@ -33,7 +33,6 @@ jobs:
 
   Docker:
 
-    needs: Predict
     runs-on: ubuntu-latest
 
     steps:
