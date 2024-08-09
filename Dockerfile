@@ -1,4 +1,4 @@
-# Utiliser une image Python officielle comme base
+# Utiliser une image Python officielle comme base 
 FROM python:3.11.4
 
 # Installer Git
