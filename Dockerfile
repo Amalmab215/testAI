@@ -21,7 +21,7 @@ COPY . /app
 EXPOSE 5000
 
 # Spécifier la commande pour exécuter l'application
-CMD ["python", "app.py"]
+CMD ["python", "app.py", "--port", "5000"]
 
 
 
