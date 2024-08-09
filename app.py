@@ -8,6 +8,9 @@ from sklearn.model_selection import train_test_split
 import subprocess
 import re
 import json 
+
+app = Flask(__name__)
+
 # Charger les données d'entraînement
 data = pd.read_csv('data.csv')
 data['functions'] = data['functions'].fillna('aucune fonction n\'est modifiée')
@@ -127,7 +130,7 @@ def get_commit_data():
     df = pd.DataFrame([new_data])
     
     return df
-
+@app.route('/predict', methods=['POST'])
 def predict():
     df = get_commit_data()
 
@@ -154,5 +157,8 @@ def predict():
     
     print(json.dumps(response))
 
+# if __name__ == '__main__':
+#     predict()
+
 if __name__ == '__main__':
-    predict()
+    app.run(debug=True)
