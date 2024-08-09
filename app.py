@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 import subprocess
 import re
 import json 
-import Flask 
+from flask import Flask, request, jsonify 
 
 app = Flask(__name__)
 
@@ -156,7 +156,11 @@ def predict():
         'Impacted_functions': df['impacted_functions'].tolist()
     }
     
-    print(json.dumps(response))
+    return jsonify(response)
+
+
+    # print(json.dumps(response))
+    
 
 # if __name__ == '__main__':
 #     predict()
