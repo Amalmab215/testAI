@@ -132,7 +132,7 @@ def get_commit_data():
     
     return df
 @app.route('/predict', methods=['POST'])
-def predict():
+async def predict():
     df = get_commit_data()
 
     df['Date'] = pd.to_datetime(df['Date'])
